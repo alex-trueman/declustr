@@ -1,0 +1,19 @@
+Package: declustr
+Title: Analysis of Spatial Sample Clustering and Declustering
+Version: 0.0.1
+Authors@R: person("Alex", "Trueman", email = "amt4158@gmail.com", role = c("aut", "cre"))
+Description: Various functions for analysing point patterns and calculating 
+    decluster weights using various methods. Current implimentation is for 2D
+    samples only.
+Depends: R (>= 3.5.0)
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+    dplyr (>= 0.7.6),
+    ggplot2 (>= 3.0.0),
+    magrittr (>= 1.5),
+    raster (>= 2.7.15),
+    rlang (>= 0.2.2),
+    spatstat (>= 1.56.1)
+RoxygenNote: 6.1.0
