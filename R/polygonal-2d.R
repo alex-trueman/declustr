@@ -30,7 +30,7 @@
 #' @export
 #' @importFrom assertthat are_equal assert_that is.scalar not_empty noNA
 #' @importFrom spatstat area dirichletAreas dirichletWeights expand.owin
-#'   intersect.owin npoints owin ppp ripras
+#'   inside.owin intersect.owin npoints owin ppp ripras
 #' @examples
 #' dec <- polydeclust2d(samples$x, samples$y, mask = mask)
 #' samples_dec <- cbind(samples, dec$weights)
@@ -73,6 +73,7 @@ polydeclust2d <- function(x, y, mask, expand_mask = 0, normalize = TRUE,
   # Just create  the required objects and set the weight.
   if (length(x) == 1) {
     points <- ppp(x, y, window = domain_mask)
+    poutside <- c()
     if (normalize) {
       return(list(weights = data.frame(weight = 1), ppp = points,
              ppp_mask = points_mask_only))
@@ -82,13 +83,16 @@ polydeclust2d <- function(x, y, mask, expand_mask = 0, normalize = TRUE,
     }
   }
 
-  # Make mask to control tessellation.
+  # Make window to control tessellation.
   if (estdomain) {
     w0 <- intersect.owin(domain_mask, ripras(data.frame(x = x, y = y)))
   } else {
     w0 <- domain_mask
   }
   w <- expand.owin(w0, distance = expand_mask)
+
+  # Identify points outside of defined window.
+  poutside <- inside.owin(x, y, w = w)
 
   # Calculate weights.
   points <- ppp(x, y, window = w)
@@ -112,7 +116,7 @@ polydeclust2d <- function(x, y, mask, expand_mask = 0, normalize = TRUE,
   assert_that(are_equal(length(x), npoints(points_mask_only)))
 
   return(list(weights = data.frame(weight = weights), ppp = points,
-              ppp_mask = points_mask_only))
+              ppp_mask = points_mask_only, outside_point = poutside))
 }
 
 #' Create Plotable Tesselation from a Point Pattern.
@@ -158,11 +162,12 @@ plotable_tess <- function(points) {
 
   # Assertions on input arguments.
   # `point` is a point pattern object with >= 1 point using a binary mask.
-  assert_that(class(points) == "ppp", msg = "retuned point pattern is not of
-    class 'ppp'")
-  assert_that(is.mask(Window(points)), msg = "point pattern must be defined with
-    binary mask")
-  assert_that(npoints(points) >= 1, msg = "point pattern must have >= 1 points")
+  assert_that(class(points) == "ppp",
+    msg = "retuned point pattern is not of class 'ppp'")
+  assert_that(is.mask(Window(points)),
+    msg = "point pattern must be defined with binary mask")
+  assert_that(npoints(points) >= 1,
+    msg = "point pattern must have >= 1 points")
 
   # If only one point there will be an error with `dirichlet`, so just
   # return the polygon of the whole domain.
@@ -190,6 +195,11 @@ plotable_tess <- function(points) {
     rasterFromXYZ() %>%
     rasterToPolygons(dissolve = TRUE) %>%
     st_as_sf()
+
+  # Assertions on return value.
+  # `sf_tess` should be of class 'sf'
+  assert_that("sf" %in% class(sf_tess),
+    msg = "return value is not of class 'sf'")
 
   return(sf_tess)
 }
@@ -231,12 +241,13 @@ point_spacing_2d <- function(points, nk = 4L) {
 
   # Assertions on input arguments.
   # `point` is a point pattern object with >= 1 point using a binary mask.
-  assert_that(class(points) == "ppp", msg = "retuned point pattern is not of
-    class 'ppp'")
-  assert_that(is.mask(Window(points)), msg = "point pattern must be defined with
-    binary mask")
-  assert_that(npoints(points) >= 1, msg = "point pattern must have >= 1 points")
-  # `nk` is a scalar integer >= 1.
+  assert_that(class(points) == "ppp",
+  msg = "retuned point pattern is not of class 'ppp'")
+  assert_that(is.mask(Window(points)),
+  msg = "point pattern must be defined with binary mask")
+  assert_that(npoints(points) >= 1,
+    msg = "point pattern must have >= 1 points")
+  # `nk` is a scalar whole number >= 1.
   assert_that(is.scalar(nk))
   assert_that(
     (function(x, tol = .Machine$double.eps^0.5) abs(x - round(x)) < tol)(nk),
