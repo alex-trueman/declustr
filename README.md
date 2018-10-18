@@ -6,7 +6,7 @@ implimented for calculating declustering weights.
 
 The current implimentation has functions for analysing and declustering 2D point
 patterns using Voronoi tesselations (polygonal declustering) and functions from 
-the `spatstat` point pattern analysis package.
+the `spatstat` point pattern analysis package (Baddeley, et al. 2015).
 
 ## Installation
 
@@ -52,3 +52,6 @@ pattern object) with column of distances.
 
 Ripley, B.D. and Rasson, J.P. (1977) Finding the edge of a Poisson forest.
 Journal of Applied Probability, 14, 483 – 491.
+
+A. Baddeley, E. Rubak and R.Turner. Spatial Point Patterns: Methodology and
+Applications with R. Chapman and Hall/CRC Press, 2015.
