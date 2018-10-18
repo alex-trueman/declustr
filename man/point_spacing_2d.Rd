@@ -2,26 +2,29 @@
 % Please edit documentation in R/polygonal-2d.R
 \name{point_spacing_2d}
 \alias{point_spacing_2d}
-\title{Calculate 2D point sample spacing.}
+\title{Calculate 2D Point Sample Spacing.}
 \usage{
-point_spacing_2d(points, nk = 4)
+point_spacing_2d(points, nk = 4L)
 }
 \arguments{
-\item{points}{A point pattern object from package `spatstat`.}
+\item{points}{A point pattern object from package \code{spatstat}.}
 
-\item{nk}{Scalar number of nearest points to use.}
+\item{nk}{Scalar number (default 4) of nearest points to use (>= 1).}
 }
 \value{
-A dataframe with columns `x`, `y`, and `distance` defining a grid of
-    points (as defined by the `points` window). This can be used in `ggplot`
-    with `geom_raster` to vizualize point spacing. Distance is the mean
-    distance to the `kn` nearest samples converted to a square grid sapcing:
-        `distance = 2 * sqrt(mean_distance^2 / 2)``
-    If there are less than `kn` points in the point pattern the distance
-    is calculated on the available samples.
+A dataframe with columns 'x', 'y', and 'distance' defining a grid of
+  points (as defined by the \code{points} window). This can be used in
+  \code{ggplot} with \code{geom_raster} to vizualize point spacing.
 }
 \description{
-Calculate 2D point sample spacing.
+\code{point_spacing_2d} computes the avererage distance to the four nearest
+samples in the mask domain. The number of nearest samples can be adjusted.
+The returned object is a dataframe of regular grid points (as defined by the
+input point pattern object) with column of distances. Distance is the mean
+distance to the \code{kn} nearest samples converted to a square grid sapcing:
+\code{distance = 2 * sqrt(mean_distance^2 / 2)}. If there are less than
+\code{kn} points in the point pattern, the distance is calculated on the
+available samples.
 }
 \examples{
 library(ggplot2)

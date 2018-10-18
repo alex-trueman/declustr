@@ -2,22 +2,36 @@
 % Please edit documentation in R/polygonal-2d.R
 \name{plotable_tess}
 \alias{plotable_tess}
-\title{Create a plotable tesselation dataframe from a point pattern.}
+\title{Create Plotable Tesselation from a Point Pattern.}
 \usage{
 plotable_tess(points)
 }
 \arguments{
-\item{points}{2D point pattern object created by package `spatstat`.}
+\item{points}{2D point pattern object created by package \code{spatstat}. It
+must have a window defined using a binary mask.}
 }
 \value{
-A simple features (sf) polygons dataframe.  May be plotted with
-    `ggplot2` using `geom_sf`.
+A simple features (\code{sf}) polygons dataframe.  May be plotted
+  with \code{ggplot2} using \code{geom_sf}.
 }
 \description{
-Create a plotable tesselation dataframe from a point pattern.
+\code{plotable_tess} returns a dataframe of points defining the edges of the
+tessellation constructed by \code{polydeclust2d}. These points can be used to
+visualize the tessellations.
 }
 \examples{
 library(ggplot2)
+
+# Tessellation with a mask only may produce excessive edge weights.
+dec <- polydeclust2d(samples$x, samples$y, mask = mask, estdomain = FALSE)
+samples_dec <- cbind(samples, dec$weights)
+ptess <- plotable_tess(dec$ppp)
+ggplot() +
+  geom_raster(data = mask, aes(x, y), fill = "lightblue") +
+  geom_sf(data = ptess, fill = NA) +
+  geom_point(data = samples_dec, aes(x, y, size = weight))
+
+# Using the `ripras` option reduces excessive edge weights.
 dec <- polydeclust2d(samples$x, samples$y, mask = mask)
 samples_dec <- cbind(samples, dec$weights)
 ptess <- plotable_tess(dec$ppp)

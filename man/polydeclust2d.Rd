@@ -2,43 +2,46 @@
 % Please edit documentation in R/polygonal-2d.R
 \name{polydeclust2d}
 \alias{polydeclust2d}
-\title{Calculate decluster weights for 2D samples using tessellations.}
+\title{Calculate Decluster Weights for 2D Samples Using Tessellations.}
 \usage{
 polydeclust2d(x, y, mask, expand_mask = 0, normalize = TRUE,
   estdomain = TRUE)
 }
 \arguments{
-\item{x}{Numeric vector. x-axis coordinates with length equal to `y`.}
+\item{x, y}{Numeric vectors. x and y axis coordinates with equal length.
+Duplicate samples are assigned a zero weight.}
 
-\item{y}{Numeric vector. x-axis coordinates with length equal to `x`.}
+\item{mask}{Numeric dataframe. x and y coordinates of grid mask. This limits
+the area of tessellation and hence the magnitude of edge weights. The
+dataframe must have only two columns with x and y coordinates in that order
+(the name of the columns is not important).}
 
-\item{mask}{Numeric dataframe. x and y coordinates of grid mask, This
-limits the area of tessellation and hence the magnitude of edge weights.}
+\item{expand_mask}{Scalar number (default 0). Units to exapand the mask.
+Sometimes when samples are on the mask boundary it is necessary to slightly
+expand the mask so that edge samples are included in the weighting process.
+Usually only a small value (e.g., 1 unit) is needed.}
 
-\item{expand_mask}{Scalar number (default `0`) of units to exapand mask.
-Sometimes when samples are on the mask boundary it is necessary to
-slightly expand the mask so that edge samples are included in the
-weighting process. Usually only a small value (e.g., 1 unit) is needed.}
+\item{normalize}{Boolean (default \code{TRUE}). Normalize the weights so that
+they sum to 1. Otherwise weights sum to the area of the mask.}
 
-\item{normalize}{Boolean (default `TRUE`). Normalize the weights so that they
-sum to 1. Otherwise weights sum to the area of the mask.}
-
-\item{estdomain}{Boolean (default `TRUE`). Estimate the spatial domain using
-a Ripley-Rasson estimate (`spatstat::ripras`) and intersect with the input
-mask to create a window for tesselation. This approach may reduce edge
-weights where the input mask is extrapolated well beyond the limits of
+\item{estdomain}{Boolean (default \code{TRUE}). Estimate the spatial domain
+using a Ripley-Rasson estimate (\code{spatstat::ripras}) and intersect with
+the input mask to create a window for tesselation. This approach may reduce
+edge weights where the input mask is extrapolated well beyond the limits of
 the data.}
 }
 \value{
-A labelled list with a dataframe of positive weights optionally
-   normalised such that the sum of weights is 1. The weights are initially
-   calculated as the ratio of the tesellated area of influence of the sample
-   divided by the total mask area. Duplicate samples are assigned a zero
-   weight. The list also contains the point pattern object used for the
-   tessellation and a point pattern object with only the mask (no ripras).
+A labelled list with a named vector of positive weights optionally
+  normalized such that the sum of weights is 1. The list also contains the
+  point pattern object used for the tessellation and a point pattern object
+  with only the mask (no ripras).
 }
 \description{
-Calculate decluster weights for 2D samples using tessellations.
+\code{polydeclust2d} calcuates decluster weights for 2D point sample data
+using Voronoi tesselations of the point data. Weights are calculated as the
+area of influence of each sample divided by the total area of the domain and
+then normalized so that the sum of all weights is 1. This normalization is
+the default but can be turned off with the \code{normalize} argument.
 }
 \examples{
 dec <- polydeclust2d(samples$x, samples$y, mask = mask)
