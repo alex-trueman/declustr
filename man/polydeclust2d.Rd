@@ -34,8 +34,13 @@ A labelled list with a dataframe of positive weights optionally
    normalised such that the sum of weights is 1. The weights are initially
    calculated as the ratio of the tesellated area of influence of the sample
    divided by the total mask area. Duplicate samples are assigned a zero
-   weight. The list also contains the point pattern object.
+   weight. The list also contains the point pattern object used for the
+   tessellation and a point pattern object with only the mask (no ripras).
 }
 \description{
 Calculate decluster weights for 2D samples using tessellations.
+}
+\examples{
+dec <- polydeclust2d(samples$x, samples$y, mask = mask)
+samples_dec <- cbind(samples, dec$weights)
 }

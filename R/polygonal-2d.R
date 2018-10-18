@@ -20,23 +20,29 @@
 #'    normalised such that the sum of weights is 1. The weights are initially
 #'    calculated as the ratio of the tesellated area of influence of the sample
 #'    divided by the total mask area. Duplicate samples are assigned a zero
-#'    weight. The list also contains the point pattern object.
+#'    weight. The list also contains the point pattern object used for the
+#'    tessellation and a point pattern object with only the mask (no ripras).
 #' @export
 #'
 #' @importFrom spatstat area dirichletAreas dirichletWeights expand.owin
 #'     intersect.owin owin ppp ripras
 #'
 #' @examples
+#' dec <- polydeclust2d(samples$x, samples$y, mask = mask)
+#' samples_dec <- cbind(samples, dec$weights)
 polydeclust2d <- function(x, y, mask, expand_mask = 0, normalize = TRUE,
                           estdomain = TRUE) {
 
-  # Create mask-only ppp for distance functions.
-  points_mask_only <- ppp(x, y, window = owin(mask = mask))
+  # Create a mask for the whole domain as defined by the `mask` argument.
+  domain_mask <- owin(mask = mask)
+
+  # Create mask-only ppp for distance function, etc.
+  points_mask_only <- ppp(x, y, window = domain_mask)
 
   # No point declustering if n = 1. Don't need to expand mask either.
+  # Just create  the required objects and set the weight.
   if (length(x) == 1) {
-    w <- owin(mask = mask)
-    points <- ppp(x, y, window = w)
+    points <- ppp(x, y, window = domain_mask)
     if (normalize) {
       return(list(weights = data.frame(weight = 1), ppp = points,
              ppp_mask = points_mask_only))
@@ -48,9 +54,9 @@ polydeclust2d <- function(x, y, mask, expand_mask = 0, normalize = TRUE,
 
   # Make mask to control tessellation.
   if (estdomain) {
-    w0 <- intersect.owin(owin(mask = mask), ripras(data.frame(x = x, y = y)))
+    w0 <- intersect.owin(domain_mask, ripras(data.frame(x = x, y = y)))
   } else {
-    w0 <- owin(mask = mask)
+    w0 <- domain_mask
   }
   w <- expand.owin(w0, distance = expand_mask)
 
@@ -65,49 +71,59 @@ polydeclust2d <- function(x, y, mask, expand_mask = 0, normalize = TRUE,
 
 #' Create a plotable tesselation dataframe from a point pattern.
 #'
-#' @param ppp 2D point pattern object created by package `spatstat`.
-#' @param raster_out Boolean (default `FALSE`). Output the tesselation as a point
-#'     grid rather than as a path-type dataframe.
+#' @param points 2D point pattern object created by package `spatstat`.
 #'
-#' @return A dataframe with x and y coordinates and group variable for each
-#'     tessellation path. May be plotted with `ggplot2` using `geom_path` (or
-#'     `geom_raster` in the case of `raster_out = TRUE`.
+#' @return A simple features (sf) polygons dataframe.  May be plotted with
+#'     `ggplot2` using `geom_sf`.
 #' @export
 #'
-#' @importFrom dplyr arrange mutate select
-#' @importFrom ggplot2 fortify
-#' @importFrom magrittr %>%
+#' @importFrom dplyr arrange bind_rows mutate select
+#' @importFrom magrittr %>% %<>%
 #' @importFrom raster rasterFromXYZ rasterToPolygons
 #' @importFrom rlang .data
+#' @importFrom sf st_as_sf
 #' @importFrom spatstat as.data.frame.owin as.data.frame.tess dirichlet npoints
 #'     Window
 #'
 #' @examples
-plotable_tess <- function(ppp, raster_out = FALSE) {
+#' library(ggplot2)
+#' dec <- polydeclust2d(samples$x, samples$y, mask = mask)
+#' samples_dec <- cbind(samples, dec$weights)
+#' ptess <- plotable_tess(dec$ppp)
+#' ggplot() +
+#'   geom_raster(data = mask, aes(x, y), fill = "lightblue") +
+#'   geom_sf(data = ptess, fill = NA) +
+#'   geom_point(data = samples_dec, aes(x, y, size = weight))
+plotable_tess <- function(points) {
 
-  # If only one point there will be an error with `dirichlet`, so just rasterize
-  # the window of the ppp.
-  if (npoints(ppp) == 1) {
-    df_raster <- as.data.frame.owin(Window(ppp)) %>%
-      mutate(group = 1) %>%
-      select(.data$x, .data$y, .data$group)
+  # If only one point there will be an error with `dirichlet`, so just
+  # return the polygon of the whole domain.
+  if (npoints(points) == 1) {
+    # Make a dataframe of the window of the ppp.
+    df_tess <- as.data.frame.owin(Window(points))
+    # If there are multiple regions there will be an id column.
+    if("id" %in% colnames(df_tess)) {
+      df_tess %<>%
+        mutate(group = as.numeric(.data$id)) %>%
+        select(.data$x, .data$y, .data$group)
+    } else {
+      df_tess %<>%
+        mutate(group = 1) %>%
+        select(.data$x, .data$y, .data$group)
+    }
   } else {
-    # Convert ppp tessellation to ratser dataframe.
-    df_raster <- as.data.frame.tess(dirichlet(ppp)) %>%
-      arrange(.data$Tile, .data$x, .data$y) %>%
-      mutate(group = .data$Tile) %>%
+    df_tess <- as.data.frame.tess(dirichlet(points)) %>%
+      mutate(group = as.numeric(.data$Tile)) %>%
       select(.data$x, .data$y, .data$group)
   }
 
-  if (raster_out) return(df_raster)
+  # Convert ppp tessellation to dataframe.
+  sf_tess <- df_tess %>%
+    rasterFromXYZ() %>%
+    rasterToPolygons(dissolve = TRUE) %>%
+    st_as_sf()
 
-  rast <- rasterFromXYZ(df_raster)
-  polyg <- rasterToPolygons(rast, dissolve = TRUE)
-  df_path <- fortify(polyg, group) %>%
-    mutate(x = .data$long, y = .data$lat) %>%
-    select(.data$group, .data$x, .data$y)
-
-  return(df_path)
+  return(sf_tess)
 }
 
 #' Calculate 2D point sample spacing.
@@ -130,6 +146,13 @@ plotable_tess <- function(ppp, raster_out = FALSE) {
 #' @importFrom spatstat as.data.frame.im as.im distfun
 #'
 #' @examples
+#' library(ggplot2)
+#' dec <- polydeclust2d(samples$x, samples$y, mask = mask)
+#' spacing <- point_spacing_2d(dec$ppp_mask)
+#' ggplot() +
+#'   geom_raster(data = spacing, aes(x, y, fill = distance)) +
+#'   geom_point(data = samples, aes(x, y)) +
+#'   scale_fill_viridis_c()
 point_spacing_2d <- function(points, nk = 4) {
   value_cols <- c(3:6)
   for (i in 1:nk) {
@@ -146,11 +169,11 @@ point_spacing_2d <- function(points, nk = 4) {
       colname <- paste0("k", i)
       dmap %<>%
         left_join(dfun, by = c("x", "y")) %>%
-        rename(`:=`(!!colname, .data$value))
+        rename(!!colname := .data$value)
     }
   }
     dmap %<>%
-      mutate(distance = 2 * sqrt((rowMeans(select(.data, c(value_cols)),
+      mutate(distance = 2 * sqrt((rowMeans(select(., c(value_cols)),
                                            na.rm = TRUE))^2/2)) %>%
       select(.data$x, .data$y, .data$distance)
 

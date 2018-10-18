@@ -4,19 +4,25 @@
 \alias{plotable_tess}
 \title{Create a plotable tesselation dataframe from a point pattern.}
 \usage{
-plotable_tess(ppp, raster_out = FALSE)
+plotable_tess(points)
 }
 \arguments{
-\item{ppp}{2D point pattern object created by package `spatstat`.}
-
-\item{raster_out}{Boolean (default `FALSE`). Output the tesselation as a point
-grid rather than as a path-type dataframe.}
+\item{points}{2D point pattern object created by package `spatstat`.}
 }
 \value{
-A dataframe with x and y coordinates and group variable for each
-    tessellation path. May be plotted with `ggplot2` using `geom_path` (or
-    `geom_raster` in the case of `raster_out = TRUE`.
+A simple features (sf) polygons dataframe.  May be plotted with
+    `ggplot2` using `geom_sf`.
 }
 \description{
 Create a plotable tesselation dataframe from a point pattern.
+}
+\examples{
+library(ggplot2)
+dec <- polydeclust2d(samples$x, samples$y, mask = mask)
+samples_dec <- cbind(samples, dec$weights)
+ptess <- plotable_tess(dec$ppp)
+ggplot() +
+  geom_raster(data = mask, aes(x, y), fill = "lightblue") +
+  geom_sf(data = ptess, fill = NA) +
+  geom_point(data = samples_dec, aes(x, y, size = weight))
 }

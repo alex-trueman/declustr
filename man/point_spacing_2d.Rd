@@ -23,3 +23,12 @@ A dataframe with columns `x`, `y`, and `distance` defining a grid of
 \description{
 Calculate 2D point sample spacing.
 }
+\examples{
+library(ggplot2)
+dec <- polydeclust2d(samples$x, samples$y, mask = mask)
+spacing <- point_spacing_2d(dec$ppp_mask)
+ggplot() +
+  geom_raster(data = spacing, aes(x, y, fill = distance)) +
+  geom_point(data = samples, aes(x, y)) +
+  scale_fill_viridis_c()
+}
