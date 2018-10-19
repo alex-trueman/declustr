@@ -1,10 +1,12 @@
 Package: declustr
 Title: Analysis of Spatial Sample Clustering and Declustering
-Version: 0.0.1
+Version: 0.1.1
 Authors@R: person("Alex", "Trueman", email = "amt4158@gmail.com", role = c("aut", "cre"))
-Description: Various functions for analysing point patterns and calculating 
+Description: Various functions for analysing point patterns and calculating
     decluster weights using various methods. Current implimentation is for 2D
     samples only.
+URL: https://github.com/truemoid/declustr
+BugReports: https://github.com/truemoid/declustr
 Depends: R (>= 3.5.0)
 License: MIT + file LICENSE
 Encoding: UTF-8

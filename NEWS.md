@@ -1,9 +1,9 @@
-# declustr 0.0.1
+# declustr 0.1.0
 
 * First release.
 
 
-# 0.0.2
+# 0.1.1
 
 * Add examples.
 * Add data for examples.
