@@ -19,10 +19,10 @@
 #' @param normalize Boolean (default \code{TRUE}). Normalize the weights so that
 #'   they sum to 1. Otherwise weights sum to the area of the mask.
 #' @param estdomain Boolean (default \code{TRUE}). Estimate the spatial domain
-#'   using a Ripley-Rasson estimate (\code{spatstat::ripras}) and intersect with
-#'   the input mask to create a window for tesselation. This approach may reduce
-#'   edge weights where the input mask is extrapolated well beyond the limits of
-#'   the data.
+#'   using a Ripley-Rasson estimate (\code{\link{ripras}}) and
+#'   intersect with the input mask to create a window for tesselation. This
+#'   approach may reduce edge weights where the input mask is extrapolated well
+#'   beyond the limits of the data.
 #' @return A labelled list with a named vector of positive weights optionally
 #'   normalized such that the sum of weights is 1. The list also contains the
 #'   point pattern object used for the tessellation and a point pattern object
@@ -122,13 +122,14 @@ polydeclust2d <- function(x, y, mask, expand_mask = 0, normalize = TRUE,
 #' Create Plotable Tesselation from a Point Pattern.
 #'
 #' \code{plotable_tess} returns a dataframe of points defining the edges of the
-#' tessellation constructed by \code{polydeclust2d}. These points can be used to
-#' visualize the tessellations.
+#' tessellation constructed by \code{\link{polydeclust2d}}. These points can be
+#' used to visualize the tessellations.
 #'
-#' @param points 2D point pattern object created by package \code{spatstat}. It
-#'   must have a window defined using a binary mask.
+#' @param points 2D point pattern object created by package
+#'   \code{\link{spatstat}}. It must have a window defined using a
+#'   binary mask.
 #' @return A simple features (\code{sf}) polygons dataframe.  May be plotted
-#'   with \code{ggplot2} using \code{geom_sf}.
+#'   with \code{\link{geom_sf}}.
 #' @export
 #' @importFrom assertthat assert_that
 #' @importFrom dplyr arrange bind_rows mutate select
@@ -215,12 +216,13 @@ plotable_tess <- function(points) {
 #' \code{kn} points in the point pattern, the distance is calculated on the
 #' available samples.
 #'
-#' @param points A point pattern object from package \code{spatstat}.
+#' @param points A point pattern object from package
+#'   \code{\link{spatstat}}.
 #' @param nk Scalar number (default 4) of nearest points to use (>= 1).
 #'
 #' @return A dataframe with columns 'x', 'y', and 'distance' defining a grid of
-#'   points (as defined by the \code{points} window). This can be used in
-#'   \code{ggplot} with \code{geom_raster} to vizualize point spacing.
+#'   points (as defined by the \code{points} window). This can be used with
+#'   \code{\link{geom_raster}} to vizualize point spacing.
 #' @export
 #'
 #' @importFrom assertthat assert_that is.scalar

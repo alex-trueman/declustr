@@ -25,10 +25,10 @@ Usually only a small value (e.g., 1 unit) is needed.}
 they sum to 1. Otherwise weights sum to the area of the mask.}
 
 \item{estdomain}{Boolean (default \code{TRUE}). Estimate the spatial domain
-using a Ripley-Rasson estimate (\code{spatstat::ripras}) and intersect with
-the input mask to create a window for tesselation. This approach may reduce
-edge weights where the input mask is extrapolated well beyond the limits of
-the data.}
+using a Ripley-Rasson estimate (\code{\link{ripras}}) and
+intersect with the input mask to create a window for tesselation. This
+approach may reduce edge weights where the input mask is extrapolated well
+beyond the limits of the data.}
 }
 \value{
 A labelled list with a named vector of positive weights optionally

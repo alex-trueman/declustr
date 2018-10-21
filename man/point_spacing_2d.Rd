@@ -7,14 +7,15 @@
 point_spacing_2d(points, nk = 4L)
 }
 \arguments{
-\item{points}{A point pattern object from package \code{spatstat}.}
+\item{points}{A point pattern object from package
+\code{\link{spatstat}}.}
 
 \item{nk}{Scalar number (default 4) of nearest points to use (>= 1).}
 }
 \value{
 A dataframe with columns 'x', 'y', and 'distance' defining a grid of
-  points (as defined by the \code{points} window). This can be used in
-  \code{ggplot} with \code{geom_raster} to vizualize point spacing.
+  points (as defined by the \code{points} window). This can be used with
+  \code{\link{geom_raster}} to vizualize point spacing.
 }
 \description{
 \code{point_spacing_2d} computes the avererage distance to the four nearest

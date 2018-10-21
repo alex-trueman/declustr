@@ -7,17 +7,18 @@
 plotable_tess(points)
 }
 \arguments{
-\item{points}{2D point pattern object created by package \code{spatstat}. It
-must have a window defined using a binary mask.}
+\item{points}{2D point pattern object created by package
+\code{\link{spatstat}}. It must have a window defined using a
+binary mask.}
 }
 \value{
 A simple features (\code{sf}) polygons dataframe.  May be plotted
-  with \code{ggplot2} using \code{geom_sf}.
+  with \code{\link{geom_sf}}.
 }
 \description{
 \code{plotable_tess} returns a dataframe of points defining the edges of the
-tessellation constructed by \code{polydeclust2d}. These points can be used to
-visualize the tessellations.
+tessellation constructed by \code{\link{polydeclust2d}}. These points can be
+used to visualize the tessellations.
 }
 \examples{
 library(ggplot2)
