@@ -64,32 +64,31 @@ polydeclust2d <- function(x, y, mask, expand_mask = 0, normalize = TRUE,
   assert_that(is.logical(estdomain))
 
   # Create a mask for the whole domain as defined by the `mask` argument.
-  domain_mask <- owin(mask = mask)
+  domain_mask <- expand.owin(owin(mask = mask), distance = expand_mask)
 
   # Create mask-only ppp for distance function, etc.
   points_mask_only <- ppp(x, y, window = domain_mask)
 
-  # No point declustering if n = 1. Don't need to expand mask either.
+  # No point declustering if n = 1.
   # Just create  the required objects and set the weight.
   if (length(x) == 1) {
     points <- ppp(x, y, window = domain_mask)
     poutside <- c()
     if (normalize) {
       return(list(weights = data.frame(weight = 1), ppp = points,
-             ppp_mask = points_mask_only))
+             ppp_mask = points_mask_only, outside_point = poutside))
     } else {
       return(list(weights = data.frame(weight = area(points)), ppp = points,
-             ppp_mask = points_mask_only))
+             ppp_mask = points_mask_only, outside_point = poutside))
     }
   }
 
   # Make window to control tessellation.
   if (estdomain) {
-    w0 <- intersect.owin(domain_mask, ripras(data.frame(x = x, y = y)))
+    w <- intersect.owin(domain_mask, ripras(data.frame(x = x, y = y)))
   } else {
-    w0 <- domain_mask
+    w <- domain_mask
   }
-  w <- expand.owin(w0, distance = expand_mask)
 
   # Identify points outside of defined window.
   poutside <- inside.owin(x, y, w = w)
